@@ -21,9 +21,18 @@ from net.phases.train import train_one_ep
 from net.phases.infer import infer_one_ep
 from net.model.utility.checkpoints import load_checkpoint, save_checkpoint
 from net.config.wandb import initialize_wandb
-from net.plot.volumes import perform_plot_3d, start_game_3d
-from scripts.script_concept_fig import create_disc_figure
-from scripts.script_weeks_fig import create_weeks_plot
+# Plotting imports made conditional to avoid pyvista/trame conflicts when not needed
+try:
+    from net.plot.volumes import perform_plot_3d, start_game_3d
+except ImportError:
+    perform_plot_3d = None
+    start_game_3d = None
+try:
+    from scripts.script_concept_fig import create_disc_figure
+    from scripts.script_weeks_fig import create_weeks_plot
+except ImportError:
+    create_disc_figure = None
+    create_weeks_plot = None
 from utils import *
 
 def pipe(dataframe, experiment_dir, params, transformations, global_wandb_steps, validate=True):

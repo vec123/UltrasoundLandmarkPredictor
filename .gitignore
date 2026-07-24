@@ -186,3 +186,9 @@ configs
 *.csv
 assets/_*
 faster_rcnn_3d copy.ipynb
+
+#Things Victor added for himself
+documentation
+inference
+test_preprocess_
+Ultrasound

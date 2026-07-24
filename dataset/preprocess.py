@@ -49,9 +49,9 @@ def perform_preprocessing(dataframe, params, logger=None):
             image_path = os.path.join(dataframe.loc[i, 'fscan'])
             name = dataframe.loc[i, 'osid']
             
-            save_im_path = params.ds.sys + params.preprocessing.save_dir + '/' + dataframe.loc[i, 'mscan']
-            save_csv_path = params.ds.sys + params.preprocessing.save_dir + '/' + dataframe.loc[i, 'mcsv']
-            save_lmk_path = params.ds.sys + params.preprocessing.save_dir + '/' + dataframe.loc[i, 'mlmk']
+            save_im_path = os.path.join(params.ds.sys, params.preprocessing.save_dir, dataframe.loc[i, 'mscan'])
+            save_csv_path = os.path.join(params.ds.sys, params.preprocessing.save_dir, dataframe.loc[i, 'mcsv'])
+            save_lmk_path = os.path.join(params.ds.sys, params.preprocessing.save_dir, dataframe.loc[i, 'mlmk'])
 
         # Skip processing if image already exists
             if os.path.exists(save_im_path):

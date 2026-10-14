@@ -1,0 +1,65 @@
+# FetusNet Landmark Inference Configuration
+#
+# End-to-end: a raw (or already-preprocessed) .nrrd -> 19 facial landmark
+# coordinates, written as Slicer-readable .fcsv / .csv.
+#
+# Ground-truth pose standardization is OPTIONAL - confirmed by the model's
+# author. Leave ground_truth.pose_path unset (null) to skip it entirely; this
+# is the expected setting for new, unannotated scans.
+#
+# Usage:
+#   python -m inference.tools.infer_landmarks inference/config_infer_landmarks.yaml --subject-ids 
+
+# === INPUT ===
+input:
+  folder: C:/Users/vic-b/Documents/Victors/Projects/Ultrasound/US_samples/Casos_Mar/{subject_id}/29_semanas
+
+  # Set true if 'volume'/'folder' already sit on the canonical 1mm/128^3 grid
+  # (e.g. produced by inference/tools/preprocess_geom.py) - skips Stage 1.
+  already_preprocessed: false
+
+# === MODEL ===
+model:
+  checkpoint: best_model/best.pt
+  device: cpu           
+  detector: argmax
+
+# === OUTPUT ===
+output:
+  # Placeholders: {scan_dir} = name of the folder the input scan sits in
+  # (e.g. 20_semanas); {subject_id} = the current --subject-ids entry.
+  # Preprocessed scans -> <folder>/<scan>.nrrd, landmarks -> <folder>/<landmarks_subfolder>/<scan>.fcsv/.csv
+  folder: inference/results/Casos_Mar/{subject_id}/{scan_dir}
+  landmarks_subfolder: LMKS
+  save_preprocessed: true
+  save_heatmaps: false
+
+# === GROUND TRUTH POSE (Optional - see header note) ===
+ground_truth:
+  pose_path: null
+  affine: false
+
+# === PREPROCESSING (Stage 1 - ignored if input.already_preprocessed) ===
+preprocessing:
+  filter: true
+  filter_size: 1            # Kernel edge in voxels
+  filter_mode: reflect       # scipy boundary mode
+
+  centering: false
+  swap_xz: true
+
+  bspline: true
+  # Canonical grid the network was trained on - do NOT change without retraining.
+  target_spacing: [1.0, 1.0, 1.0]  # mm
+  target_size: [128, 128, 128]      # voxels
+
+# === LANDMARKS ===
+# Order must match the checkpoint's training order (net/config/default.yaml:
+# target.lmks). Only set this if a given checkpoint used a different order.
+landmarks:
+  names: null  
+  swap_LR: false
+# === BATCH OPTIONS (only used when input.folder is set) ===
+batch:
+  pattern: "*.nrrd"
+  overwrite: true

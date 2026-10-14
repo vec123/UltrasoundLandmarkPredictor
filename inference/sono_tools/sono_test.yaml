@@ -1,0 +1,35 @@
+# SonoNet Test Configuration
+#
+# Tests SonoNet predictions against ground truth poses from gt.txt.
+# Computes translation error (mm) and rotation error (degrees).
+#
+# Usage:
+#   python -m inference.tools.test_sono inference/config_test.yaml
+
+# === CHECKPOINT ===
+checkpoint: dataset/utility/gtpp/checkpoints/best_model_514
+
+# === INPUT ===
+input:
+  # Point to your NRRD files
+  folder: Ultrasound/annotated/1/20_semanas
+  # Or single file:
+  # volume: Ultrasound/annotated/1/20_semanas/1-20s-01.nrrd
+
+# === GROUND TRUTH ===
+ground_truth:
+  # Path to gt.txt with pose annotations
+  pose_path: doc/info/gt.txt
+
+# === OUTPUT ===
+output:
+  # Path to save detailed test results JSON
+  json: inference/results/sono_test.json
+
+# === INFERENCE OPTIONS (optional) ===
+inference:
+  # Torch device: "cpu" or "cuda"
+  device: cpu
+
+  # Glob pattern for volumes within input.folder
+  pattern: "*.nrrd"

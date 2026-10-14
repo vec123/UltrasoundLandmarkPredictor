@@ -1,0 +1,50 @@
+# FetusNet Preprocessing Configuration
+#
+# Geometric preprocessing: filter + B-spline resample to fixed 1mm isotropic 128³ grid.
+# Optional affine pose standardization using ground truth poses from gt.txt (if avail).
+#
+# Usage:
+#   python -m inference.tools.preprocess_geom config_preprocess.yaml
+
+# === INPUT ===
+input:
+  # Path to folder containing .nrrd volumes (required if --volume not given)
+  #folder: Ultrasound/annotated/1/20_semanas
+  # Alternatively, preprocess a single .nrrd file:
+  volume: Ultrasound/annotated/1/20_semanas/1-20s-01.nrrd
+
+# === OUTPUT ===
+output:
+  # Folder to save preprocessed volumes
+  folder:  inference/results/preprocessed/1
+
+# === GROUND TRUTH POSES (Optional) ===
+# If provided, applies affine transformation using rotation + translation from gt.txt
+ground_truth:
+  # Path to gt.txt: JSON dict like {"1-20s-01": {"rotation": [[...]], "translation": [...]}}
+  # Set to null to skip affine step.
+  pose_path: doc/info/gt.txt
+
+# === PREPROCESSING PARAMETERS ===
+preprocessing:
+  # Low-pass smoothing (uint8 → uint8, speckle reduction)
+  filter: true
+  filter_size: 3           # Kernel edge in voxels
+  filter_mode: reflect     # scipy boundary mode
+
+  # B-spline resample to canonical grid (1mm isotropic, 128³)
+  # Do NOT change these unless retraining the model
+  bspline: true
+  target_spacing: [1.0, 1.0, 1.0]  # mm
+  target_size: [128, 128, 128]      # voxels
+
+  # Affine transformation (pose standardization)
+  # Only applied if ground_truth.pose_path is set and affine=true
+  affine: true
+
+# === BATCH OPTIONS ===
+batch:
+  # Glob pattern for volumes within input.folder
+  pattern: "*.nrrd"
+  # Skip volumes that already exist in output folder
+  overwrite: false

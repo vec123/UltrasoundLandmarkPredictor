@@ -189,6 +189,10 @@ This creates files like:
 The preprocessing mode loads raw volumes and raw landmark CSV/FCSV files, then saves standardized volumes and transformed landmarks under `DATA/volumes/` and `DATA/landmarks/`.
 
 ```bash
+python fetusnet.py --config default.yaml --nrrd my_nrrd.nrrd
+
+
+
 python fetusnet.py \
   --mode=preprocess \
   --ds.sys="/media/.../" \

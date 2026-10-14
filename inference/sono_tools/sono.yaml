@@ -1,0 +1,42 @@
+# SonoNet Inference Configuration
+#
+# Runs SonoNet on ultrasound volumes to estimate translation and rotation.
+# Preprocessing: smoothing + B-spline resample to 128³ at 1mm isotropic (same as training).
+# Saves results to JSON with format:
+#   {
+#     "filename": {
+#       "pose": {
+#         "tran": [...],
+#         "rot": [...],
+#         "g1": [...],
+#         "g2": [...]
+#       }
+#     }
+#   }
+#
+# Usage:
+#   python -m inference.tools.get_sono_planes inference/sono.yaml
+
+# === CHECKPOINT ===
+checkpoint: dataset/utility/gtpp/checkpoints/best_model_514
+
+# === INPUT ===
+input:
+  # Path to single .nrrd file:
+  # volume: Ultrasound/1/scan.nrrd
+  #
+  # OR path to folder containing .nrrd files:
+  folder: Ultrasound/1
+
+# === OUTPUT ===
+output:
+  # Path to save JSON results
+  json: inference/results/sono_poses/output.json
+
+# === INFERENCE OPTIONS (optional) ===
+inference:
+  # Torch device: "cpu" or "cuda"
+  device: cpu
+
+  # Glob pattern for volumes within input.folder
+  pattern: "*.nrrd"

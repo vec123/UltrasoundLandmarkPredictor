@@ -1,0 +1,57 @@
+# SE(3) Equivariance Evaluation
+#
+# Makes rigid (rotation + translation) copies gV of one volume, runs
+# inference/tools/infer_landmarks on each, and scores
+#     error = || f(gV) - g f(V) ||   (mm, per landmark)
+# where f(V) is the prediction on the untouched volume - the "ground truth"
+# here. 0 mm everywhere = perfectly equivariant; no annotations needed.
+#
+# Usage (repo root; GPU env recommended - ~100 forward passes):
+#   python -m SE3_equiv.run_se3_equiv SE3_equiv/config_se3_equiv.yaml
+
+# === INPUT ===
+input:
+  # Must already sit on the model's input grid (1 mm, 128^3). 10142001.nrrd is
+  # the friend's processed DATA2 volume of Casos Mar 14-20s-01 - already x<->z
+  # swapped into best.pt's frame.
+  volume: 10142001.nrrd
+
+# === MODEL ===
+# Checkpoint, detector and landmark names come from the normal inference
+# config, so another model is evaluated by pointing at another config.
+infer_config: inference/config_infer_landmarks.yaml
+infer_overrides:
+  already_preprocessed: true   # input is already on the model grid
+  swap_xz: false               # 10142001.nrrd is already swapped - never swap twice
+                               # (true for our own *_preprocessed.nrrd outputs)
+  save_heatmaps: false         # 19 x 8 MB per copy otherwise
+  device: auto                 # cuda if available, else cpu
+
+# === OUTPUT ===
+output:
+  folder: SE3_equiv/results/10142001
+
+# === TRANSFORMS ===
+# Axes i/j/k = array axes 0/1/2 of the input volume.
+transforms:
+  center: landmarks        # rotate about the reference landmarks' centroid (keeps the face in the box); or volume, or [x, y, z] mm
+  interpolation_order: 1   # 1 trilinear, 3 cubic B-spline; 90-degree rotations and whole-mm shifts are exact either way
+  identity: true           # determinism check - must give 0 mm
+  cube_rotations: true     # the 23 exact 90/120/180-degree cube rotations - no interpolation
+  axis_sweep:
+    axes: [i, j, k]
+    angles_deg: [-60, -30, -15, -5, 5, 15, 30, 60, 90, 120, 180]
+  translations:
+    axes: [i, j, k]
+    shifts_mm: [0.5, 1, 2, 4, 8, 16]   # 0.5 = interpolation only; 16 = the net's total stride
+  random:
+    n: 200
+    angle_sampling: uniform  # uniform: angle uniform in [0, max_angle_deg], small angles as common as large
+                             # haar: uniform over all rotations - small angles rare (<1% below 30 deg)
+    max_angle_deg: 180
+    max_shift_mm: 10
+    seed: 0
+
+# === EVALUATION ===
+evaluation:
+  fov_margin_vox: 3        # landmarks moved out of the box (minus this) are left out of the scores

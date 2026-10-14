@@ -189,6 +189,17 @@ faster_rcnn_3d copy.ipynb
 
 #Things Victor added for himself
 documentation
-inference
 test_preprocess_
-Ultrasound
+
+# Model weights (distributed as GitHub Release assets, not in git)
+best_model/
+
+# Generated outputs (may contain patient-derived volumes)
+*.nrrd
+SE3_equiv/results/
+inference/results/
+inference/results - Copy/
+
+# Separate clones, not part of this repo
+newrepo/
+dataset/plane-detection/
